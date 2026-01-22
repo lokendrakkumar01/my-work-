@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🚀 Creator Control Hub
 
 > **Enterprise-grade, AI-powered creator management platform** - Your complete command center for YouTube, social media, productivity, and project management.
@@ -393,3 +394,6 @@ For issues or questions:
 ---
 
 **Built with ❤️ for creators, by a creator**
+=======
+# my-work-
+>>>>>>> 370f7035c83864f0bc958c799ba89bcae61478d4
