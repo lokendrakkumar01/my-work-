@@ -29,7 +29,7 @@ class ApiClient {
             }
       }
 
-      private async request<T>(
+      private async request<T = any>(
             endpoint: string,
             options: RequestInit = {}
       ): Promise<ApiResponse<T>> {
