@@ -72,35 +72,34 @@ app.use('/uploads', express.static('uploads'));
 // ===================================
 // MONGODB CONNECTION
 // ===================================
+// Connection Status Tracker
+let dbStatus = {
+  status: 'disconnected',
+  lastError: null
+};
+
 if (process.env.SKIP_DB_CONNECTION !== 'true' && process.env.MONGODB_URI) {
   mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
   })
-    .then(() => console.log('✅ MongoDB connected successfully'))
+    .then(() => {
+      console.log('✅ MongoDB connected successfully');
+      dbStatus.status = 'connected';
+      dbStatus.lastError = null;
+    })
     .catch((err) => {
       console.error('❌ MongoDB connection error:', err.message);
+      dbStatus.status = 'error';
+      dbStatus.lastError = err.message;
       console.warn('⚠️  Running in NO-DATABASE mode. Some features will not work.');
     });
 } else {
   console.warn('⚠️  MongoDB connection skipped (SKIP_DB_CONNECTION=true or no MONGODB_URI)');
-  console.warn('⚠️  Running in NO-DATABASE mode. Deploy to production with MongoDB Atlas.');
+  dbStatus.status = 'skipped';
 }
 
-// ===================================
-// API ROUTES
-// ===================================
-app.use('/api/auth', authRoutes);
-app.use('/api/user', userRoutes);
-app.use('/api/social', socialRoutes);
-app.use('/api/youtube', youtubeRoutes);
-app.use('/api/tasks', taskRoutes);
-app.use('/api/habits', habitRoutes);
-app.use('/api/projects', projectRoutes);
-app.use('/api/ai', aiRoutes);
-app.use('/api/files', fileRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/analytics', analyticsRoutes);
+// ... (routes)
 
 // ===================================
 // HEALTH CHECK
@@ -109,7 +108,8 @@ app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    database: dbStatus
   });
 });
 
@@ -121,7 +121,8 @@ app.get('/', (req, res) => {
     message: '🚀 Creator Control Hub API',
     version: '1.0.0',
     documentation: '/api/docs',
-    health: '/health'
+    health: '/health',
+    database_status: dbStatus.status
   });
 });
 

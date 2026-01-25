@@ -277,6 +277,16 @@ class ApiClient {
       async markNotificationAsRead(id: string) {
             return this.request(`/notifications/${id}/read`, { method: 'PUT' });
       }
+
+      // System Health
+      async getSystemHealth() {
+            try {
+                  const response = await fetch(`${this.baseURL.replace('/api', '')}/health`);
+                  return await response.json();
+            } catch (error) {
+                  return { status: 'error', database: { status: 'unreachable' } };
+            }
+      }
 }
 
 export const api = new ApiClient(API_URL);

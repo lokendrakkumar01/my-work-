@@ -10,6 +10,8 @@ export default function DashboardPage() {
       const [user, setUser] = useState<any>(null);
       const [analytics, setAnalytics] = useState<any>(null);
 
+      const [health, setHealth] = useState<any>(null);
+
       useEffect(() => {
             const checkAuth = async () => {
                   try {
@@ -24,6 +26,11 @@ export default function DashboardPage() {
                         if (analyticsRes.success) {
                               setAnalytics(analyticsRes.data);
                         }
+
+                        // Check System Health
+                        const healthRes = await api.getSystemHealth();
+                        setHealth(healthRes);
+
                   } catch (error) {
                         router.push('/login');
                   } finally {
@@ -79,6 +86,28 @@ export default function DashboardPage() {
                                     Here's your creator overview
                               </p>
                         </div>
+
+                        {/* System Health Check Alert */}
+                        {health && health.database?.status !== 'connected' && (
+                              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-8 rounded shadow-sm">
+                                    <div className="flex items-center">
+                                          <div className="py-1"><svg className="h-6 w-6 text-red-500 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg></div>
+                                          <div>
+                                                <p className="font-bold">System Warning: Database Disconnected</p>
+                                                <p className="text-sm">
+                                                      The backend is not connected to MongoDB. Your data will not be saved.
+                                                      <br />
+                                                      <strong>Fix:</strong> Check your Render Environment Variables for <code>MONGODB_URI</code>.
+                                                </p>
+                                                {health.database?.lastError && (
+                                                      <p className="text-xs mt-2 font-mono bg-red-200 p-1 rounded">
+                                                            Error: {health.database.lastError}
+                                                      </p>
+                                                )}
+                                          </div>
+                                    </div>
+                              </div>
+                        )}
 
                         {/* Stats Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
