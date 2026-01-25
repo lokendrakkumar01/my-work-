@@ -1,4 +1,11 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+let API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+// Dynamic API URL for production fallback
+if (typeof window !== 'undefined') {
+      if (window.location.hostname === 'creator-hub-un8y.onrender.com' && !process.env.NEXT_PUBLIC_API_URL) {
+            API_URL = 'https://creator-hub-backend.onrender.com/api';
+      }
+}
 
 interface ApiResponse<T = any> {
       success: boolean;

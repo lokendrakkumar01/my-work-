@@ -36,8 +36,23 @@ app.use('/api/', limiter);
 // ===================================
 // CORS CONFIGURATION
 // ===================================
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://creator-hub-un8y.onrender.com', // Explicitly allow frontend
+  ...(process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : [])
+];
+
+console.log('✅ Allowed CORS Origins:', allowedOrigins);
+
 const corsOptions = {
-  origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:3000'],
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('❌ CORS Blocked Origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 200
 };

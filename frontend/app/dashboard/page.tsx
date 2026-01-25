@@ -129,19 +129,31 @@ export default function DashboardPage() {
                                     Quick Actions
                               </h3>
                               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <button className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition text-center">
+                                    <button
+                                          onClick={() => router.push('/social')}
+                                          className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition text-center"
+                                    >
                                           <div className="text-3xl mb-2">📝</div>
                                           <p className="text-sm font-medium text-gray-900 dark:text-white">New Post</p>
                                     </button>
-                                    <button className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition text-center">
+                                    <button
+                                          onClick={() => router.push('/youtube')}
+                                          className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition text-center"
+                                    >
                                           <div className="text-3xl mb-2">🎥</div>
                                           <p className="text-sm font-medium text-gray-900 dark:text-white">New Video</p>
                                     </button>
-                                    <button className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition text-center">
+                                    <button
+                                          onClick={() => router.push('/tasks')}
+                                          className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition text-center"
+                                    >
                                           <div className="text-3xl mb-2">✏️</div>
                                           <p className="text-sm font-medium text-gray-900 dark:text-white">Add Task</p>
                                     </button>
-                                    <button className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition text-center">
+                                    <button
+                                          onClick={() => router.push('/ai')}
+                                          className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition text-center"
+                                    >
                                           <div className="text-3xl mb-2">🤖</div>
                                           <p className="text-sm font-medium text-gray-900 dark:text-white">AI Copilot</p>
                                     </button>
