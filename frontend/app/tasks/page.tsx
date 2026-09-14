@@ -48,16 +48,22 @@ export default function TasksPage() {
       const handleSubmit = async (e: React.FormEvent) => {
             e.preventDefault();
             try {
-                  const res = await api.createTask({
-                        ...formData,
-                        status: 'pending' // Default status
-                  });
+                  const payload: any = {
+                        title: formData.title,
+                        description: formData.description,
+                        priority: formData.priority,
+                        status: 'todo'
+                  };
+                  if (formData.dueDate) {
+                        payload.dueDate = new Date(formData.dueDate).toISOString();
+                  }
+                  const res = await api.createTask(payload);
                   if (res.success) {
                         setShowModal(false);
                         setFormData({ title: '', description: '', priority: 'medium', dueDate: '' });
                         fetchTasks();
                   } else {
-                        alert(res.message || 'Failed to create task');
+                        alert(res.message || res.error || 'Failed to create task');
                   }
             } catch (err: any) {
                   alert(err.message || 'An error occurred');

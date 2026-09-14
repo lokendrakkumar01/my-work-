@@ -158,7 +158,6 @@ const userSchema = new mongoose.Schema({
 // ===================================
 // INDEXES
 // ===================================
-userSchema.index({ email: 1 });
 userSchema.index({ 'socialMedia.youtube.channelId': 1 });
 
 // ===================================
@@ -224,7 +223,9 @@ userSchema.methods.toJSON = function () {
       const user = this.toObject();
       delete user.password;
       delete user.otp;
-      delete user.twoFactorAuth.secret;
+      if (user.twoFactorAuth) {
+            delete user.twoFactorAuth.secret;
+      }
       return user;
 };
 

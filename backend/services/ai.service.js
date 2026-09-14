@@ -1,20 +1,36 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // Initialize Gemini
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+let genAI = null;
+if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== '<YOUR_GEMINI_API_KEY>') {
+      try {
+            genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+      } catch (err) {
+            console.warn('⚠️ Gemini initialization warning:', err.message);
+      }
+}
 
 /**
  * Generate AI content using Gemini
  */
 const generateContent = async (prompt) => {
+      if (!genAI) {
+            console.warn('⚠️ Gemini API key not configured or in demo mode.');
+            return `[AI Demo Mode - Please configure GEMINI_API_KEY in .env for live AI responses]\n\nPreview Response:\n` +
+                   `Generated insights based on your prompt:\n` +
+                   `1. High-engagement creative hook\n` +
+                   `2. Structured delivery tailored to your creator profile\n` +
+                   `3. Action-oriented conclusion with viewer call-to-action`;
+      }
+
       try {
-            const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+            const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
             const result = await model.generateContent(prompt);
             const response = await result.response;
             return response.text();
       } catch (error) {
             console.error('AI generation error:', error);
-            throw new Error('Failed to generate AI content');
+            throw new Error(error.message || 'Failed to generate AI content');
       }
 };
 

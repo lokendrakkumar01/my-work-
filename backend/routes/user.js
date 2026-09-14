@@ -33,6 +33,10 @@ router.put('/profile', auth, async (req, res) => {
                   { new: true, runValidators: true }
             );
 
+            if (!user) {
+                  return res.status(404).json({ success: false, message: 'User not found' });
+            }
+
             res.json({
                   success: true,
                   message: 'Profile updated successfully',

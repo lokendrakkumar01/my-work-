@@ -187,7 +187,6 @@ const socialPostSchema = new mongoose.Schema({
 // INDEXES
 // ===================================
 socialPostSchema.index({ userId: 1, status: 1 });
-socialPostSchema.index({ scheduledFor: 1 });
 socialPostSchema.index({ createdAt: -1 });
 
 // ===================================

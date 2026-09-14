@@ -17,7 +17,7 @@ const auth = async (req, res, next) => {
             }
 
             // Verify token
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'creator_control_hub_jwt_secret_dev_key_2026');
 
             // Find user
             const user = await User.findOne({
@@ -91,7 +91,7 @@ const optionalAuth = async (req, res, next) => {
             const token = req.header('Authorization')?.replace('Bearer ', '');
 
             if (token) {
-                  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                  const decoded = jwt.verify(token, process.env.JWT_SECRET || 'creator_control_hub_jwt_secret_dev_key_2026');
                   const user = await User.findById(decoded.userId);
 
                   if (user) {

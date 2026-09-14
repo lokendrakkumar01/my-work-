@@ -6,10 +6,17 @@ import api from '@/lib/api';
 
 interface Video {
       _id: string;
-      title: string;
-      description: string;
-      status: string;
+      title?: string;
+      description?: string;
+      status?: string;
+      stage?: string;
       thumbnailUrl?: string;
+      idea?: {
+            title?: string;
+            description?: string;
+            category?: string;
+            priority?: string;
+      };
 }
 
 export default function YouTubePage() {
@@ -46,13 +53,20 @@ export default function YouTubePage() {
       const handleSubmit = async (e: React.FormEvent) => {
             e.preventDefault();
             try {
-                  const res = await api.createYouTubeVideo(formData);
+                  const payload = {
+                        idea: {
+                              title: formData.title,
+                              description: formData.description
+                        },
+                        stage: formData.status || 'idea'
+                  };
+                  const res = await api.createYouTubeVideo(payload);
                   if (res.success) {
                         setShowModal(false);
                         setFormData({ title: '', description: '', status: 'idea' });
                         fetchVideos();
                   } else {
-                        alert(res.message || 'Failed to create video');
+                        alert(res.message || res.error || 'Failed to create video');
                   }
             } catch (err: any) {
                   alert(err.message || 'An error occurred');
@@ -93,18 +107,23 @@ export default function YouTubePage() {
                         )}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                              {videos.map((video) => (
-                                    <div key={video._id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
-                                          <div className="flex justify-between items-start mb-4">
-                                                <h3 className="text-xl font-bold dark:text-white truncate">{video.title}</h3>
-                                                <span className={`px-2 py-1 rounded text-xs font-semibold
-                  ${video.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                                                      {video.status}
-                                                </span>
+                              {videos.map((video) => {
+                                    const videoTitle = video.idea?.title || video.title || 'Untitled Video';
+                                    const videoDesc = video.idea?.description || video.description || '';
+                                    const videoStatus = video.stage || video.status || 'idea';
+                                    return (
+                                          <div key={video._id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+                                                <div className="flex justify-between items-start mb-4">
+                                                      <h3 className="text-xl font-bold dark:text-white truncate">{videoTitle}</h3>
+                                                      <span className={`px-2 py-1 rounded text-xs font-semibold
+                        ${videoStatus === 'published' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                                                            {videoStatus}
+                                                      </span>
+                                                </div>
+                                                <p className="text-gray-600 dark:text-gray-300 line-clamp-3 mb-4">{videoDesc}</p>
                                           </div>
-                                          <p className="text-gray-600 dark:text-gray-300 line-clamp-3 mb-4">{video.description}</p>
-                                    </div>
-                              ))}
+                                    );
+                              })}
 
                               {videos.length === 0 && (
                                     <div className="col-span-full text-center py-12 text-gray-500">

@@ -2,8 +2,8 @@ let API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 // Dynamic API URL for production fallback
 if (typeof window !== 'undefined') {
-      if (window.location.hostname === 'creator-hub-un8y.onrender.com' && !process.env.NEXT_PUBLIC_API_URL) {
-            API_URL = 'https://creator-hub-backend.onrender.com/api';
+      if (window.location.hostname.includes('onrender.com') && !process.env.NEXT_PUBLIC_API_URL) {
+            API_URL = 'https://creator-hub-backend-ejx4.onrender.com/api';
       }
 }
 
@@ -72,10 +72,16 @@ class ApiClient {
 
       // Auth endpoints
       async register(email: string, password: string, fullName?: string) {
-            return this.request('/auth/register', {
+            const response = await this.request('/auth/register', {
                   method: 'POST',
                   body: JSON.stringify({ email, password, fullName }),
             });
+
+            if (response.success && response.data?.token) {
+                  this.setToken(response.data.token);
+            }
+
+            return response;
       }
 
       async login(email: string, password: string) {

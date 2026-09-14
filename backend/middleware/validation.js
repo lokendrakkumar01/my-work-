@@ -95,20 +95,31 @@ const taskValidation = [
  * Social post validation
  */
 const socialPostValidation = [
-      body('content.text')
-            .trim()
-            .notEmpty()
-            .withMessage('Post content is required')
-            .isLength({ max: 5000 })
-            .withMessage('Content cannot exceed 5000 characters'),
-      body('platforms')
-            .isArray({ min: 1 })
-            .withMessage('At least one platform is required'),
-      body('platforms.*')
-            .isIn(['youtube', 'linkedin', 'twitter', 'instagram'])
-            .withMessage('Invalid platform'),
+      body('content').custom((val, { req }) => {
+            if (typeof val === 'string' && val.trim().length > 0) {
+                  req.body.content = { text: val.trim() };
+                  return true;
+            }
+            if (val && typeof val === 'object' && typeof val.text === 'string' && val.text.trim().length > 0) {
+                  return true;
+            }
+            throw new Error('Post content is required');
+      }),
+      body('platforms').custom((val, { req }) => {
+            if (!val && req.body.platform) {
+                  req.body.platforms = [req.body.platform];
+                  return true;
+            }
+            if (Array.isArray(val) && val.length > 0) {
+                  const validPlatforms = ['youtube', 'linkedin', 'twitter', 'instagram'];
+                  const allValid = val.every(p => validPlatforms.includes(p));
+                  if (!allValid) throw new Error('Invalid platform');
+                  return true;
+            }
+            throw new Error('At least one platform is required');
+      }),
       body('scheduledFor')
-            .optional()
+            .optional({ checkFalsy: true })
             .isISO8601()
             .withMessage('Invalid date format'),
       validate
@@ -118,16 +129,19 @@ const socialPostValidation = [
  * YouTube video validation
  */
 const youtubeVideoValidation = [
-      body('idea.title')
-            .trim()
-            .notEmpty()
-            .withMessage('Video title is required')
-            .isLength({ max: 200 })
-            .withMessage('Title cannot exceed 200 characters'),
-      body('idea.priority')
-            .optional()
-            .isIn(['low', 'medium', 'high', 'urgent'])
-            .withMessage('Invalid priority'),
+      body('idea').custom((val, { req }) => {
+            if (!val && req.body.title) {
+                  req.body.idea = {
+                        title: req.body.title,
+                        description: req.body.description || ''
+                  };
+                  return true;
+            }
+            if (val && typeof val.title === 'string' && val.title.trim().length > 0) {
+                  return true;
+            }
+            throw new Error('Video title is required');
+      }),
       validate
 ];
 

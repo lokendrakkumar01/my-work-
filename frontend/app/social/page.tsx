@@ -6,11 +6,12 @@ import api from '@/lib/api';
 
 interface SocialPost {
       _id: string;
-      content: string;
-      platform: string;
+      content: string | { text: string; hashtags?: string[]; mentions?: string[]; media?: any[] };
+      platform?: string;
+      platforms?: string[];
       status: string;
-      scheduledFor: string;
-      createdAt: string;
+      scheduledFor?: string;
+      createdAt?: string;
 }
 
 export default function SocialPage() {
@@ -47,13 +48,18 @@ export default function SocialPage() {
       const handleSubmit = async (e: React.FormEvent) => {
             e.preventDefault();
             try {
-                  const res = await api.createSocialPost(formData);
+                  const payload = {
+                        content: { text: formData.content },
+                        platforms: [formData.platform],
+                        ...(formData.scheduledFor ? { scheduledFor: new Date(formData.scheduledFor).toISOString() } : {})
+                  };
+                  const res = await api.createSocialPost(payload);
                   if (res.success) {
                         setShowModal(false);
                         setFormData({ content: '', platform: 'twitter', scheduledFor: '' });
                         fetchPosts(); // Refresh list
                   } else {
-                        alert(res.message || 'Failed to create post');
+                        alert(res.message || res.error || 'Failed to create post');
                   }
             } catch (err: any) {
                   alert(err.message || 'An error occurred');
@@ -94,26 +100,30 @@ export default function SocialPage() {
                         )}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                              {posts.map((post) => (
-                                    <div key={post._id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
-                                          <div className="flex justify-between items-start mb-4">
-                                                <span className={`px-2 py-1 rounded text-xs font-semibold
-                  ${post.platform === 'twitter' ? 'bg-blue-100 text-blue-800' :
-                                                            post.platform === 'linkedin' ? 'bg-blue-50 text-blue-600' :
-                                                                  'bg-purple-100 text-purple-800'}`}>
-                                                      {post.platform.toUpperCase()}
-                                                </span>
-                                                <span className={`px-2 py-1 rounded text-xs font-semibold
-                  ${post.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                                                      {post.status}
-                                                </span>
+                              {posts.map((post) => {
+                                    const platformName = (post.platform || (post.platforms && post.platforms[0]) || 'twitter').toLowerCase();
+                                    const contentText = typeof post.content === 'object' && post.content !== null ? (post.content.text || '') : String(post.content || '');
+                                    return (
+                                          <div key={post._id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+                                                <div className="flex justify-between items-start mb-4">
+                                                      <span className={`px-2 py-1 rounded text-xs font-semibold
+                        ${platformName === 'twitter' ? 'bg-blue-100 text-blue-800' :
+                                                                  platformName === 'linkedin' ? 'bg-blue-50 text-blue-600' :
+                                                                        'bg-purple-100 text-purple-800'}`}>
+                                                            {platformName.toUpperCase()}
+                                                      </span>
+                                                      <span className={`px-2 py-1 rounded text-xs font-semibold
+                        ${post.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                                            {post.status}
+                                                      </span>
+                                                </div>
+                                                <p className="text-gray-800 dark:text-gray-200 mb-4 whitespace-pre-line">{contentText}</p>
+                                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                                      Scheduled: {post.scheduledFor ? new Date(post.scheduledFor).toLocaleDateString() : 'Now'}
+                                                </div>
                                           </div>
-                                          <p className="text-gray-800 dark:text-gray-200 mb-4">{post.content}</p>
-                                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                                                Scheduled: {post.scheduledFor ? new Date(post.scheduledFor).toLocaleDateString() : 'Now'}
-                                          </div>
-                                    </div>
-                              ))}
+                                    );
+                              })}
 
                               {posts.length === 0 && (
                                     <div className="col-span-full text-center py-12 text-gray-500">

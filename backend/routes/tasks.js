@@ -19,7 +19,10 @@ router.get('/', auth, async (req, res) => {
 
 router.post('/', auth, async (req, res) => {
       try {
-            const task = new Task({ ...req.body, userId: req.userId });
+            const body = { ...req.body };
+            if (body.status === 'pending') body.status = 'todo';
+            if (!body.dueDate) delete body.dueDate;
+            const task = new Task({ ...body, userId: req.userId });
             await task.save();
             res.status(201).json({ success: true, data: { task } });
       } catch (error) {
@@ -29,9 +32,12 @@ router.post('/', auth, async (req, res) => {
 
 router.put('/:id', auth, async (req, res) => {
       try {
+            const body = { ...req.body };
+            if (body.status === 'pending') body.status = 'todo';
+            if (body.dueDate === '') delete body.dueDate;
             const task = await Task.findOneAndUpdate(
                   { _id: req.params.id, userId: req.userId },
-                  { $set: req.body },
+                  { $set: body },
                   { new: true }
             );
             if (!task) return res.status(404).json({ success: false, message: 'Task not found' });

@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const fs = require('fs');
+const path = require('path');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -46,7 +48,7 @@ console.log('✅ Allowed CORS Origins:', allowedOrigins);
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.onrender.com')) {
       callback(null, true);
     } else {
       console.log('❌ CORS Blocked Origin:', origin);
@@ -67,7 +69,11 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // ===================================
 // STATIC FILES
 // ===================================
-app.use('/uploads', express.static('uploads'));
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsDir));
 
 // ===================================
 // MONGODB CONNECTION
@@ -79,10 +85,7 @@ let dbStatus = {
 };
 
 if (process.env.SKIP_DB_CONNECTION !== 'true' && process.env.MONGODB_URI) {
-  mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  })
+  mongoose.connect(process.env.MONGODB_URI)
     .then(() => {
       console.log('✅ MongoDB connected successfully');
       dbStatus.status = 'connected';
@@ -99,7 +102,20 @@ if (process.env.SKIP_DB_CONNECTION !== 'true' && process.env.MONGODB_URI) {
   dbStatus.status = 'skipped';
 }
 
-// ... (routes)
+// ===================================
+// API ROUTES
+// ===================================
+app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/social', socialRoutes);
+app.use('/api/youtube', youtubeRoutes);
+app.use('/api/tasks', taskRoutes);
+app.use('/api/habits', habitRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/files', fileRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // ===================================
 // HEALTH CHECK

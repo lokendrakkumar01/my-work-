@@ -23,8 +23,18 @@ router.get('/', auth, async (req, res) => {
 
 router.post('/', auth, socialPostValidation, async (req, res) => {
       try {
+            const body = { ...req.body };
+            if (typeof body.content === 'string') {
+                  body.content = { text: body.content };
+            }
+            if (body.platform && (!body.platforms || body.platforms.length === 0)) {
+                  body.platforms = [body.platform];
+            }
+            if (!body.scheduledFor) {
+                  delete body.scheduledFor;
+            }
             const post = new SocialPost({
-                  ...req.body,
+                  ...body,
                   userId: req.userId
             });
             await post.save();
@@ -41,9 +51,19 @@ router.post('/', auth, socialPostValidation, async (req, res) => {
 
 router.put('/:id', auth, async (req, res) => {
       try {
+            const updates = { ...req.body };
+            if (typeof updates.content === 'string') {
+                  updates.content = { text: updates.content };
+            }
+            if (updates.platform && (!updates.platforms || updates.platforms.length === 0)) {
+                  updates.platforms = [updates.platform];
+            }
+            if (!updates.scheduledFor) {
+                  delete updates.scheduledFor;
+            }
             const post = await SocialPost.findOneAndUpdate(
                   { _id: req.params.id, userId: req.userId },
-                  { $set: req.body },
+                  { $set: updates },
                   { new: true, runValidators: true }
             );
 

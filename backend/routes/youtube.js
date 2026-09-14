@@ -19,7 +19,20 @@ router.get('/', auth, async (req, res) => {
 
 router.post('/', auth, async (req, res) => {
       try {
-            const video = new YouTubeVideo({ ...req.body, userId: req.userId });
+            const body = { ...req.body };
+            if (!body.idea && body.title) {
+                  body.idea = {
+                        title: body.title,
+                        description: body.description || ''
+                  };
+            }
+            if (body.status && !body.stage) {
+                  body.stage = body.status;
+                  delete body.status;
+            } else if (body.status && !['active', 'archived', 'deleted'].includes(body.status)) {
+                  delete body.status;
+            }
+            const video = new YouTubeVideo({ ...body, userId: req.userId });
             await video.save();
 
             res.status(201).json({
@@ -34,9 +47,14 @@ router.post('/', auth, async (req, res) => {
 
 router.put('/:id', auth, async (req, res) => {
       try {
+            const updates = { ...req.body };
+            if (updates.status && !updates.stage && !['active', 'archived', 'deleted'].includes(updates.status)) {
+                  updates.stage = updates.status;
+                  delete updates.status;
+            }
             const video = await YouTubeVideo.findOneAndUpdate(
                   { _id: req.params.id, userId: req.userId },
-                  { $set: req.body },
+                  { $set: updates },
                   { new: true, runValidators: true }
             );
 
