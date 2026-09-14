@@ -97,6 +97,18 @@ class ApiClient {
             return response;
       }
 
+      async demoLogin() {
+            const response = await this.request('/auth/demo-login', {
+                  method: 'POST'
+            });
+
+            if (response.success && response.data?.token) {
+                  this.setToken(response.data.token);
+            }
+
+            return response;
+      }
+
       async sendOTP(email: string) {
             return this.request('/auth/send-otp', {
                   method: 'POST',
@@ -169,6 +181,10 @@ class ApiClient {
                   method: 'PUT',
                   body: JSON.stringify(data),
             });
+      }
+
+      async deleteYouTubeVideo(id: string) {
+            return this.request(`/youtube/${id}`, { method: 'DELETE' });
       }
 
       // Task endpoints
@@ -264,6 +280,27 @@ class ApiClient {
             count?: number;
       }) {
             return this.request('/ai/content-ideas', {
+                  method: 'POST',
+                  body: JSON.stringify(data),
+            });
+      }
+
+      async generateHashtags(data: {
+            content: string;
+            platform: string;
+            count?: number;
+      }) {
+            return this.request('/ai/hashtags', {
+                  method: 'POST',
+                  body: JSON.stringify(data),
+            });
+      }
+
+      async generateProductivityPlan(data: {
+            goals: string;
+            timeframe?: string;
+      }) {
+            return this.request('/ai/productivity-plan', {
                   method: 'POST',
                   body: JSON.stringify(data),
             });

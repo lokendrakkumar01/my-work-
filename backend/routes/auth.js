@@ -351,4 +351,117 @@ router.get('/me', auth, async (req, res) => {
       }
 });
 
+/**
+ * @route   POST /api/auth/demo-login
+ * @desc    Instant one-click demo login for portfolio reviewers and guests
+ * @access  Public
+ */
+router.post('/demo-login', async (req, res) => {
+      try {
+            const Task = require('../models/Task');
+            const SocialPost = require('../models/SocialPost');
+            const YouTubeVideo = require('../models/YouTubeVideo');
+
+            const demoEmail = 'demo@creatorhub.dev';
+            let user = await User.findOne({ email: demoEmail });
+
+            if (!user) {
+                  user = new User({
+                        email: demoEmail,
+                        password: 'DemoPassword2026!',
+                        'profile.fullName': 'Demo Creator',
+                        'profile.bio': 'Tech creator building in public & testing Creator Control Hub.',
+                        'profile.niche': 'Technology & Web Development',
+                        isVerified: true
+                  });
+                  await user.save();
+
+                  // Seed initial demo data for rich portfolio showcase
+                  await Task.insertMany([
+                        {
+                              userId: user._id,
+                              title: 'Record YouTube Tutorial on Next.js 16',
+                              description: 'Record chapter 1-4 with live coding and deployment demo.',
+                              priority: 'high',
+                              status: 'in-progress',
+                              dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
+                        },
+                        {
+                              userId: user._id,
+                              title: 'Publish Weekly Twitter Thread',
+                              description: 'Share 5 key learnings about building full-stack applications.',
+                              priority: 'medium',
+                              status: 'completed',
+                              dueDate: new Date()
+                        },
+                        {
+                              userId: user._id,
+                              title: 'Design YouTube Thumbnail for SaaS Launch',
+                              description: 'High contrast 1280x720 thumbnail with bold headline font.',
+                              priority: 'urgent',
+                              status: 'todo',
+                              dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000)
+                        }
+                  ]);
+
+                  await SocialPost.insertMany([
+                        {
+                              userId: user._id,
+                              content: { text: 'Just launched my new creator management platform built with Next.js 16 and Node.js! 🚀 Check it out and let me know your thoughts.' },
+                              platforms: ['twitter'],
+                              status: 'published'
+                        },
+                        {
+                              userId: user._id,
+                              content: { text: 'Excited to announce our upcoming masterclass on scaling full-stack applications on the cloud. Link in bio! 💡' },
+                              platforms: ['linkedin'],
+                              status: 'scheduled',
+                              scheduledFor: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+                        }
+                  ]);
+
+                  await YouTubeVideo.insertMany([
+                        {
+                              userId: user._id,
+                              stage: 'recording',
+                              idea: {
+                                    title: 'Building a Full-Stack AI SaaS in 2026',
+                                    description: 'Step-by-step breakdown of modern web tech stack with Gemini AI integration.',
+                                    priority: 'urgent',
+                                    category: 'Tech'
+                              }
+                        },
+                        {
+                              userId: user._id,
+                              stage: 'script',
+                              idea: {
+                                    title: '10 MERN Stack Architecture Patterns You Need to Know',
+                                    description: 'Production tips for scaling MongoDB, Express, and React applications.',
+                                    priority: 'high',
+                                    category: 'Coding'
+                              }
+                        }
+                  ]);
+            }
+
+            const token = generateToken(user._id);
+
+            res.json({
+                  success: true,
+                  message: 'Demo login successful',
+                  data: {
+                        user: user.toJSON(),
+                        token
+                  }
+            });
+      } catch (error) {
+            console.error('Demo login error:', error);
+            res.status(500).json({
+                  success: false,
+                  message: 'Demo login failed',
+                  error: error.message
+            });
+      }
+});
+
 module.exports = router;

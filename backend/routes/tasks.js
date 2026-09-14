@@ -35,6 +35,11 @@ router.put('/:id', auth, async (req, res) => {
             const body = { ...req.body };
             if (body.status === 'pending') body.status = 'todo';
             if (body.dueDate === '') delete body.dueDate;
+            if (body.status === 'completed') {
+                  body.completedAt = new Date();
+            } else if (body.status && body.status !== 'completed') {
+                  body.completedAt = null;
+            }
             const task = await Task.findOneAndUpdate(
                   { _id: req.params.id, userId: req.userId },
                   { $set: body },
